@@ -15,7 +15,7 @@ decrypt=false
 net_encryption=false
 section=""
 
-usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s] path"
+usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] path"
 usage_long="$usage_short\n-e: Encrypt target."
 usage_long="$usage_long\n-d: Decrypts target."
 usage_long="$usage_long\n-n: Specifies to use .NET encryption.${NC}"
@@ -44,7 +44,7 @@ while getopts "$options" opt ; do
     n )
       net_encryption=true
       ;;
-    n )
+    s )
       section=$OPTARG
       ;;
     h )
