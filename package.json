@@ -1,6 +1,6 @@
 {
   "name": "cryptkeeper",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Handles encryption and decryption of stuff.",
   "main": "index.js",
   "directories": {
