@@ -1,0 +1,97 @@
+#!/bin/bash
+#
+# Handles encryption decryption of stuff
+
+set -e
+OPTIND=1
+
+NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+
+encrypt=false
+decrypt=false
+net_encryption=false
+section=""
+
+usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s] path"
+usage_long="$usage_short\n-e: Encrypt target."
+usage_long="$usage_long\n-d: Decrypts target."
+usage_long="$usage_long\n-n: Specifies to use .NET encryption.${NC}"
+
+usage_short="$usage_short\nUse -h to get supported command information.${NC}"
+
+if [ "$#" == "0" ] ; then
+  >&2 echo -e "$usage_short"
+  exit 1
+fi
+
+path="$1"
+shift
+
+options=":edns:h"
+
+### Command line flags
+while getopts "$options" opt ; do
+    case "$opt" in
+    e )
+      encrypt=true
+      ;;
+    d )
+      decrypt=true
+      ;;
+    n )
+      net_encryption=true
+      ;;
+    n )
+      section=$OPTARG
+      ;;
+    h )
+      >&2 echo -e "$usage_long" && exit 1
+      exit 0
+      ;;
+    \?)
+      >&2 echo -e "Unknown option: -$OPTARG"
+      >&2 echo -e "$usage_short"
+      exit 1
+      ;;
+    : )
+      >&2 echo -e "Missing option argument for -$OPTARG"
+      >&2 echo -e "$usage_short"
+      exit 1
+      ;;
+    * )
+      >&2 echo -e "Unimplemented option: -$OPTARG" && exit 1
+      >&2 echo -e "$usage_short"
+      exit 1
+    esac
+    shift $((OPTIND-1))
+done
+
+if [ "$encrypt" = "$decrypt" ] ; then
+  >&2 echo -e "${RED}--Must specify encrypt (-e) or decrypt (-d) but not both--${NC}"
+  exit 1
+fi
+
+file_root="$(dirname "$path")"
+file_name="$(basename "$path")"
+
+if [ "$net_encryption" = true ] ; then
+  if [ "$section" = "" ] ; then
+    >&2 echo -e "${RED}--Must set app config section to encrypt using .NET encryption--${NC}"
+    exit 1
+  fi
+
+  >&2 echo "--Encrypting connection strings in app config--"
+  web_config_path="$file_root/web.config"
+  mv "$file_path" "$web_config_path"
+  if [ "$encrypt" = true ] ; then
+    aspnet_regiis -pe "$section" -app "$file_root"
+  elif [ "$decrypt" = true ] ; then
+    aspnet_regiis -de "$section" -app "$file_root"
+  fi
+  mv "$web_config_path" "$file_path"
+fi
+
+>&2 echo "${GREEN}--cryptkeeper finished successfully--${NC}"
