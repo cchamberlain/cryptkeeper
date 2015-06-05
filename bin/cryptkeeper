@@ -27,9 +27,6 @@ if [ "$#" == "0" ] ; then
   exit 1
 fi
 
-path="$1"
-shift
-
 options=":edns:h"
 
 ### Command line flags
@@ -68,6 +65,9 @@ while getopts "$options" opt ; do
     esac
     shift $((OPTIND-1))
 done
+
+path="$1"
+shift
 
 if [ "$encrypt" = "$decrypt" ] ; then
   >&2 echo -e "${RED}--Must specify encrypt (-e) or decrypt (-d) but not both--${NC}"
