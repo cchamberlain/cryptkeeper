@@ -74,8 +74,26 @@ if [ "$encrypt" = "$decrypt" ] ; then
   exit 1
 fi
 
+to_win_path() {
+  if [ "$1" ] ; then
+    # handle absolute
+    if [[ "$1" == /* ]] ; then
+      # strip leading slash and convert to backslash
+      win_path=$(echo "$1" | sed -e 's/^\///'  -e 's/\//\\\\/g')
+      # Add semicolon after drive
+      win_path=$(echo "${win_path:0:1}:${win_path:1}")
+      echo -en "$win_path"
+    else
+      # convert to backslash
+      win_path=$(echo "$1" | 's/\//\\\\/g')
+      echo -en "$win_path"
+    fi
+  fi
+}
+
 file_root="$(dirname "$path")"
 file_name="$(basename "$path")"
+
 
 if [ "$net_encryption" = true ] ; then
   if [ "$section" = "" ] ; then
@@ -83,15 +101,18 @@ if [ "$net_encryption" = true ] ; then
     exit 1
   fi
 
-  >&2 echo "--Encrypting connection strings in app config--"
   web_config_path="$file_root/web.config"
   mv "$file_path" "$web_config_path"
+  win_file_root="$(to_win_path "$file_root")"
   if [ "$encrypt" = true ] ; then
-    aspnet_regiis -pe "$section" -app "$file_root"
+    >&2 echo "--Encrypting $section of config in $win_file_root--"
+    aspnet_regiis -pe "$section" -app "$win_file_root"
+    >&2 echo -e "${GREEN}--Encryption completed successfully--${NC}"
   elif [ "$decrypt" = true ] ; then
-    aspnet_regiis -de "$section" -app "$file_root"
+    >&2 echo "--Decrypting $section of config in $win_file_root--"
+    aspnet_regiis -de "$section" -app "$win_file_root"
+    >&2 echo -e "${GREEN}--Decryption completed successfully--${NC}"
   fi
   mv "$web_config_path" "$file_path"
 fi
 
->&2 echo "${GREEN}--cryptkeeper finished successfully--${NC}"
