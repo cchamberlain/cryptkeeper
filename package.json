@@ -1,10 +1,10 @@
 {
   "name": "cryptkeeper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Handles encryption and decryption of stuff.",
   "main": "index.js",
   "directories": {
-  	"bin": "bin"
+    "bin": "bin"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,6 @@
   "bugs": {
     "url": "https://github.com/cchamberlain/cryptkeeper/issues"
   },
-  "homepage": "https://github.com/cchamberlain/cryptkeeper#readme"
+  "homepage": "https://github.com/cchamberlain/cryptkeeper#readme",
+  "scripts": {}
 }
