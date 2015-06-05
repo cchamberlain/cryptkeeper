@@ -84,7 +84,7 @@ to_win_path() {
       echo -en "$win_path"
     else
       # convert to backslash
-      win_path=$(echo "$1" | 's/\//\\\\/g')
+      win_path=$(echo "$1" | sed 's/\//\\\\/g')
       echo -en "$win_path"
     fi
   fi
