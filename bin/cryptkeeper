@@ -28,6 +28,7 @@ if [ "$#" == "0" ] ; then
 fi
 
 options="edns:h"
+shopt -u nocasematch
 OPTIND=1
 while getopts "$options" opt ; do
     case "$opt" in
