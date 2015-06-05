@@ -3,7 +3,6 @@
 # Handles encryption decryption of stuff
 
 set -e
-OPTIND=1
 
 NC='\033[0m'
 RED='\033[0;31m'
@@ -18,7 +17,8 @@ section=""
 usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] path"
 usage_long="$usage_short\n-e: Encrypt target."
 usage_long="$usage_long\n-d: Decrypts target."
-usage_long="$usage_long\n-n: Specifies to use .NET encryption.${NC}"
+usage_long="$usage_long\n-n: Specifies to use .NET encryption."
+usage_long="$usage_long\n-s: Specifies section of file to be encrypted.${NC}"
 
 usage_short="$usage_short\nUse -h to get supported command information.${NC}"
 
@@ -27,9 +27,8 @@ if [ "$#" == "0" ] ; then
   exit 1
 fi
 
-options=":edns:h"
-
-### Command line flags
+options="edns:h"
+OPTIND=1
 while getopts "$options" opt ; do
     case "$opt" in
     e )
@@ -63,10 +62,10 @@ while getopts "$options" opt ; do
       >&2 echo -e "$usage_short"
       exit 1
     esac
-    shift $((OPTIND-1))
 done
+shift $((OPTIND-1))
 
-path="$1"
+file_path="$1"
 shift
 
 if [ "$encrypt" = "$decrypt" ] ; then
@@ -91,9 +90,8 @@ to_win_path() {
   fi
 }
 
-file_root="$(dirname "$path")"
-file_name="$(basename "$path")"
-
+file_root="$(dirname "$file_path")"
+file_name="$(basename "$file_path")"
 
 if [ "$net_encryption" = true ] ; then
   if [ "$section" = "" ] ; then
@@ -102,17 +100,18 @@ if [ "$net_encryption" = true ] ; then
   fi
 
   web_config_path="$file_root/web.config"
-  mv "$file_path" "$web_config_path"
+  cp "$file_path" "$web_config_path"
   win_file_root="$(to_win_path "$file_root")"
   if [ "$encrypt" = true ] ; then
     >&2 echo "--Encrypting $section of config in $win_file_root--"
-    aspnet_regiis -pe "$section" -app "$win_file_root"
+    aspnet_regiis -pef "$section" "$win_file_root"
     >&2 echo -e "${GREEN}--Encryption completed successfully--${NC}"
   elif [ "$decrypt" = true ] ; then
     >&2 echo "--Decrypting $section of config in $win_file_root--"
-    aspnet_regiis -de "$section" -app "$win_file_root"
+    aspnet_regiis -pdf "$section" "$win_file_root"
     >&2 echo -e "${GREEN}--Decryption completed successfully--${NC}"
   fi
+  rm "$file_path"
   mv "$web_config_path" "$file_path"
 fi
 
