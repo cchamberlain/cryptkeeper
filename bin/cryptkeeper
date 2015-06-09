@@ -12,6 +12,11 @@ BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 YELLOW='\033[1;33m'
 
+if ! hash cpath 2>/dev/null; then
+  >&2 printf "%b- cpath required, installing globally... -%b" "$CYAN" "$NC"
+  npm install -g cpath
+fi
+
 encrypt=false
 decrypt=false
 net_encryption=false
@@ -33,7 +38,7 @@ usage_long="$usage_long\n-E: export the keys to xml file to be deployed${NC}"
 usage_short="$usage_short\nuse -h to get supported command information${NC}"
 
 if [ "$#" == "0" ] ; then
-  >&2 echo -e "$usage_short"
+  >&2 printf "%b" "$usage_short"
   exit 1
 fi
 
@@ -92,33 +97,16 @@ file_path="$1"
 shift
 
 if [ "$encrypt" = "$decrypt" ] ; then
-  >&2 echo -e "${RED}--Must specify encrypt (-e) or decrypt (-d) but not both--${NC}"
+  >&2 printf "%b- must specify encrypt (-e) or decrypt (-d) but not both -%b" "$RED" "$NC"
   exit 1
 fi
-
-to_win_path() {
-  if [ "$1" ] ; then
-    # handle absolute
-    if [[ "$1" == /* ]] ; then
-      # strip leading slash and convert to backslash
-      win_path=$(echo "$1" | sed -e 's/^\///'  -e 's/\//\\\\/g')
-      # Add semicolon after drive
-      win_path=$(echo "${win_path:0:1}:${win_path:1}")
-      echo -en "$win_path"
-    else
-      # convert to backslash
-      win_path=$(echo "$1" | sed 's/\//\\\\/g')
-      echo -en "$win_path"
-    fi
-  fi
-}
 
 file_root="$(dirname "$file_path")"
 file_name="$(basename "$file_path")"
 
 if [ "$net_encryption" = true ] ; then
   if [ "$section" = "" ] ; then
-    >&2 echo -e "${RED}--Must set app config section to encrypt using .NET encryption--${NC}"
+    >&2 printf "%b- must set app config section to encrypt using .NET encryption -%b" "$RED" "$NC"
     exit 1
   fi
 
@@ -127,25 +115,25 @@ if [ "$net_encryption" = true ] ; then
     export_xml_path="${export_root}/${container}.xml"
     rimraf "$export_script_path"
     rimraf "$export_xml_path"
-    win_export_xml_path="$(to_win_path "$export_xml_path")"
-    win_export_script_path="$(to_win_path "$export_script_path")"
-    >&2 echo -e "--Exporting keys to $win_export_xml_path--"
+    win_export_xml_path="$(cpath -w "$export_xml_path")"
+    win_export_script_path="$(cpath -w "$export_script_path")"
+    >&2 printf "- exporting keys to %s -" "$win_export_xml_path"
     aspnet_regiis -pc "$container" -exp
     aspnet_regiis -px "$container" "$win_export_xml_path" -pri
-    echo -e "aspnet_regiis -pi \"${container}\" \"${win_export_xml_path}\"\r\naspnet_regiis -pa \"${container}\" \"NT Authority\Network Service\"" >"$win_export_script_path"
+    printf "aspnet_regiis -pi \"%s\" \"%s\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$container" "$win_export_xml_path" "$container" >"$win_export_script_path"
   fi
 
   web_config_path="$file_root/web.config"
   cp "$file_path" "$web_config_path"
-  win_file_root="$(to_win_path "$file_root")"
+  win_file_root="$(cpath -w "$file_root")"
   if [ "$encrypt" = true ] ; then
-    >&2 echo "--Encrypting $section of config in $win_file_root--"
+    >&2 printf "- encrypting %s of config in %s -" "$section" "$win_file_root"
     aspnet_regiis -pef "$section" "$win_file_root" -prov "$provider"
-    >&2 echo -e "${GREEN}--Encryption completed successfully--${NC}"
+    >&2 printf "%b- encryption completed successfully -%b" "$GREEN" "$NC"
   elif [ "$decrypt" = true ] ; then
-    >&2 echo "--Decrypting $section of config in $win_file_root--"
+    >&2 printf "- decrypting %s of config in %s -" "$section" "$win_file_root"
     aspnet_regiis -pdf "$section" "$win_file_root" -prov "$provider"
-    >&2 echo -e "${GREEN}--Decryption completed successfully--${NC}"
+    >&2 printf "%b- decryption completed successfully -%b" "$GREEN" "$NC"
   fi
   rm "$file_path"
   mv "$web_config_path" "$file_path"
