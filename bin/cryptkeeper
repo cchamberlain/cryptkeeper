@@ -32,7 +32,7 @@ if [ "$#" == "0" ] ; then
   exit 1
 fi
 
-options="edns:h"
+options="edns:p:C:Eh"
 shopt -u nocasematch
 OPTIND=1
 while getopts "$options" opt ; do
