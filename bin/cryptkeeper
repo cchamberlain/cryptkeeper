@@ -13,12 +13,14 @@ encrypt=false
 decrypt=false
 net_encryption=false
 section=""
+provider="RsaProtectedConfigurationProvider"
 
-usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] path"
+usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] path"
 usage_long="$usage_short\n-e: Encrypt target."
 usage_long="$usage_long\n-d: Decrypts target."
 usage_long="$usage_long\n-n: Specifies to use .NET encryption."
-usage_long="$usage_long\n-s: Specifies section of file to be encrypted.${NC}"
+usage_long="$usage_long\n-s: Specifies section of file to be encrypted."
+usage_long="$usage_long\n-p: Specifies provider to use.${NC}"
 
 usage_short="$usage_short\nUse -h to get supported command information.${NC}"
 
@@ -43,6 +45,9 @@ while getopts "$options" opt ; do
       ;;
     s )
       section=$OPTARG
+      ;;
+    p )
+      provider=$OPTARG
       ;;
     h )
       >&2 echo -e "$usage_long" && exit 1
@@ -105,11 +110,11 @@ if [ "$net_encryption" = true ] ; then
   win_file_root="$(to_win_path "$file_root")"
   if [ "$encrypt" = true ] ; then
     >&2 echo "--Encrypting $section of config in $win_file_root--"
-    aspnet_regiis -pef "$section" "$win_file_root"
+    aspnet_regiis -pef "$section" "$win_file_root" -prov "$provider"
     >&2 echo -e "${GREEN}--Encryption completed successfully--${NC}"
   elif [ "$decrypt" = true ] ; then
     >&2 echo "--Decrypting $section of config in $win_file_root--"
-    aspnet_regiis -pdf "$section" "$win_file_root"
+    aspnet_regiis -pdf "$section" "$win_file_root" -prov "$provider"
     >&2 echo -e "${GREEN}--Decryption completed successfully--${NC}"
   fi
   rm "$file_path"
