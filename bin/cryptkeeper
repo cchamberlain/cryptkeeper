@@ -8,6 +8,9 @@ NC='\033[0m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+YELLOW='\033[1;33m'
 
 encrypt=false
 decrypt=false
@@ -18,16 +21,16 @@ container=""
 export=false
 export_root="$PWD"
 
-usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-C container] [-E export-directory] path"
-usage_long="$usage_short\n-e: Encrypt target."
-usage_long="$usage_long\n-d: Decrypts target."
-usage_long="$usage_long\n-n: Specifies to use .NET encryption."
-usage_long="$usage_long\n-s: Specifies section of file to be encrypted."
-usage_long="$usage_long\n-p: Specifies provider to use."
-usage_long="$usage_long\n-C: Specifies container to use."
-usage_long="$usage_long\n-E: Export the keys to xml file to be deployed.${NC}"
+usage_short="${BLUE}usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-C container] [-E export-directory] path"
+usage_long="$usage_short\n-e: encrypt target"
+usage_long="$usage_long\n-d: decrypts target"
+usage_long="$usage_long\n-n: specifies to use .NET encryption"
+usage_long="$usage_long\n-s: specifies section of file to be encrypted"
+usage_long="$usage_long\n-p: specifies provider to use"
+usage_long="$usage_long\n-C: specifies container to use"
+usage_long="$usage_long\n-E: export the keys to xml file to be deployed${NC}"
 
-usage_short="$usage_short\nuse -h to get supported command information.${NC}"
+usage_short="$usage_short\nuse -h to get supported command information${NC}"
 
 if [ "$#" == "0" ] ; then
   >&2 echo -e "$usage_short"
@@ -64,22 +67,22 @@ while getopts "$options" opt ; do
       fi
       ;;
     h )
-      >&2 echo -e "$usage_long" && exit 1
+      >&2 printf "%b" "$usage_long" && exit 1
       exit 0
       ;;
     \?)
-      >&2 echo -e "Unknown option: -$OPTARG"
-      >&2 echo -e "$usage_short"
+      >&2 printf "%b" "unknown option: -$OPTARG"
+      >&2 printf "%b" "$usage_short"
       exit 1
       ;;
     : )
-      >&2 echo -e "Missing option argument for -$OPTARG"
-      >&2 echo -e "$usage_short"
+      >&2 printf "%b" "missing option argument for -$OPTARG"
+      >&2 printf "%b" "$usage_short"
       exit 1
       ;;
     * )
-      >&2 echo -e "Unimplemented option: -$OPTARG" && exit 1
-      >&2 echo -e "$usage_short"
+      >&2 printf "%b" "unimplemented option: -$OPTARG"
+      >&2 printf "%b" "$usage_short"
       exit 1
     esac
 done
