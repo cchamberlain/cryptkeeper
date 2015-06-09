@@ -128,7 +128,7 @@ if [ "$net_encryption" = true ] ; then
     fi
     aspnet_regiis -pc "$container" -exp || true
     aspnet_regiis -px "$container" "$win_export_xml_path" -pri
-    printf "aspnet_regiis -pi \"%s\" \"%s\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$container" "$win_export_xml_path" "$container" >"$win_export_script_path"
+    printf "\%comspec\% /k ""C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\Tools\VsDevCmd.bat""\r\naspnet_regiis -pi \"%s\" \"%s.xml\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$container" "$container" "$container" >"$win_export_script_path"
   fi
 
   web_config_path="$file_root/web.config"
