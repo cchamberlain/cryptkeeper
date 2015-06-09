@@ -25,15 +25,17 @@ provider="RsaProtectedConfigurationProvider"
 container=""
 export=false
 export_root="$PWD"
+reexport=false
 
-usage_short="${BLUE}usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-C container] [-E export-directory] path"
+usage_short="${BLUE}usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-C container] [-E export-directory] [-R] path"
 usage_long="$usage_short\n-e: encrypt target"
 usage_long="$usage_long\n-d: decrypts target"
 usage_long="$usage_long\n-n: specifies to use .NET encryption"
 usage_long="$usage_long\n-s: specifies section of file to be encrypted"
 usage_long="$usage_long\n-p: specifies provider to use"
 usage_long="$usage_long\n-C: specifies container to use"
-usage_long="$usage_long\n-E: export the keys to xml file to be deployed${NC}"
+usage_long="$usage_long\n-E: export the keys to xml file to be deployed"
+usage_long="$usage_long\n-R: delete and reexport container${NC}"
 
 usage_short="$usage_short\nuse -h to get supported command information${NC}"
 
@@ -42,7 +44,7 @@ if [ "$#" == "0" ] ; then
   exit 1
 fi
 
-options=":edns:p:C:E:h"
+options=":edns:p:C:E:Rh"
 shopt -u nocasematch
 OPTIND=1
 while getopts "$options" opt ; do
@@ -70,6 +72,9 @@ while getopts "$options" opt ; do
       if [ "$OPTARG" != true ] ; then
         export_root="$OPTARG"
       fi
+      ;;
+    R )
+      reexport=true
       ;;
     h )
       >&2 printf "%b" "$usage_long" && exit 1
@@ -118,7 +123,10 @@ if [ "$net_encryption" = true ] ; then
     win_export_xml_path="$(cpath -w "$export_xml_path")"
     win_export_script_path="$(cpath -w "$export_script_path")"
     >&2 printf -- "- exporting keys to %s -" "$win_export_xml_path"
-    aspnet_regiis -pc "$container" -exp
+    if [ "$reexport" = true ] ; then
+      aspnet_regiis -pz "$container" || true
+    fi
+    aspnet_regiis -pc "$container" -exp || true
     aspnet_regiis -px "$container" "$win_export_xml_path" -pri
     printf "aspnet_regiis -pi \"%s\" \"%s\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$container" "$win_export_xml_path" "$container" >"$win_export_script_path"
   fi
