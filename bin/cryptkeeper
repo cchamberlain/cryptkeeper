@@ -22,8 +22,9 @@ usage_long="$usage_short\n-e: Encrypt target."
 usage_long="$usage_long\n-d: Decrypts target."
 usage_long="$usage_long\n-n: Specifies to use .NET encryption."
 usage_long="$usage_long\n-s: Specifies section of file to be encrypted."
-usage_long="$usage_long\n-p: Specifies provider to use.${NC}"
-usage_long="$usage_long\n-E: Export the keys to xml file to be deployed."
+usage_long="$usage_long\n-p: Specifies provider to use."
+usage_long="$usage_long\n-C: Specifies container to use."
+usage_long="$usage_long\n-E: Export the keys to xml file to be deployed.${NC}"
 
 usage_short="$usage_short\nUse -h to get supported command information.${NC}"
 
