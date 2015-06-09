@@ -115,7 +115,10 @@ if [ "$net_encryption" = true ] ; then
   fi
 
   if [ "$export" = true ] ; then
+    container_path="${file_root}/${container}.xml"
+    win_container_path="$(to_win_path "$container_path")"
     aspnet_regiis -pc "$container" -exp
+    aspnet_regiis -px "$container" "$win_container_path" -pri
   fi
 
   web_config_path="$file_root/web.config"
