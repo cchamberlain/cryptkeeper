@@ -117,7 +117,7 @@ if [ "$net_encryption" = true ] ; then
     rimraf "$export_xml_path"
     win_export_xml_path="$(cpath -w "$export_xml_path")"
     win_export_script_path="$(cpath -w "$export_script_path")"
-    >&2 printf "- exporting keys to %s -" "$win_export_xml_path"
+    >&2 printf -- "- exporting keys to %s -" "$win_export_xml_path"
     aspnet_regiis -pc "$container" -exp
     aspnet_regiis -px "$container" "$win_export_xml_path" -pri
     printf "aspnet_regiis -pi \"%s\" \"%s\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$container" "$win_export_xml_path" "$container" >"$win_export_script_path"
@@ -127,11 +127,11 @@ if [ "$net_encryption" = true ] ; then
   cp "$file_path" "$web_config_path"
   win_file_root="$(cpath -w "$file_root")"
   if [ "$encrypt" = true ] ; then
-    >&2 printf "- encrypting %s of config in %s -" "$section" "$win_file_root"
+    >&2 printf -- "- encrypting %s of config in %s -" "$section" "$win_file_root"
     aspnet_regiis -pef "$section" "$win_file_root" -prov "$provider"
     >&2 printf "%b- encryption completed successfully -%b" "$GREEN" "$NC"
   elif [ "$decrypt" = true ] ; then
-    >&2 printf "- decrypting %s of config in %s -" "$section" "$win_file_root"
+    >&2 printf -- "- decrypting %s of config in %s -" "$section" "$win_file_root"
     aspnet_regiis -pdf "$section" "$win_file_root" -prov "$provider"
     >&2 printf "%b- decryption completed successfully -%b" "$GREEN" "$NC"
   fi
