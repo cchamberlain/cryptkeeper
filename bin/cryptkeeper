@@ -130,7 +130,7 @@ if [ "$net_encryption" = true ] ; then
     aspnet_regiis -px "$container" "$win_export_xml_path" -pri
 
     vs_dev_cmd="C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\Tools\VsDevCmd.bat"
-    printf "%%comspec%% /k \"\"%s\"\"\r\naspnet_regiis -pi \"%s\" \"%s.xml\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$vs_dev_cmd" "$container" "$container" "$container" >"$win_export_script_path"
+    printf "call \"%s\"\r\naspnet_regiis -pi \"%s\" \"%s.xml\"\r\naspnet_regiis -pa \"%s\" \"NT Authority\Network Service\"" "$vs_dev_cmd" "$container" "$container" "$container" >"$win_export_script_path"
   fi
 
   web_config_path="$file_root/web.config"
