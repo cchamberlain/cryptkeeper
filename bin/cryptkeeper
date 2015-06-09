@@ -13,21 +13,28 @@ encrypt=false
 decrypt=false
 net_encryption=false
 section=""
+provider="RsaProtectedConfigurationProvider"
+container=""
+export=false
+export_root="$PWD"
 
-usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] path"
+usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-C container] [-E export-directory] path"
 usage_long="$usage_short\n-e: Encrypt target."
 usage_long="$usage_long\n-d: Decrypts target."
 usage_long="$usage_long\n-n: Specifies to use .NET encryption."
-usage_long="$usage_long\n-s: Specifies section of file to be encrypted.${NC}"
+usage_long="$usage_long\n-s: Specifies section of file to be encrypted."
+usage_long="$usage_long\n-p: Specifies provider to use."
+usage_long="$usage_long\n-C: Specifies container to use."
+usage_long="$usage_long\n-E: Export the keys to xml file to be deployed.${NC}"
 
-usage_short="$usage_short\nUse -h to get supported command information.${NC}"
+usage_short="$usage_short\nuse -h to get supported command information.${NC}"
 
 if [ "$#" == "0" ] ; then
   >&2 echo -e "$usage_short"
   exit 1
 fi
 
-options="edns:h"
+options=":edns:p:C:E:h"
 shopt -u nocasematch
 OPTIND=1
 while getopts "$options" opt ; do
@@ -43,6 +50,18 @@ while getopts "$options" opt ; do
       ;;
     s )
       section=$OPTARG
+      ;;
+    p )
+      provider=$OPTARG
+      ;;
+    C )
+      container=$OPTARG
+      ;;
+    E )
+      export=true
+      if [ "$OPTARG" != true ] ; then
+        export_root="$OPTARG"
+      fi
       ;;
     h )
       >&2 echo -e "$usage_long" && exit 1
@@ -100,16 +119,29 @@ if [ "$net_encryption" = true ] ; then
     exit 1
   fi
 
+  if [ "$export" = true ] ; then
+    export_script_path="${export_root}/${container}.cmd"
+    export_xml_path="${export_root}/${container}.xml"
+    rimraf "$export_script_path"
+    rimraf "$export_xml_path"
+    win_export_xml_path="$(to_win_path "$export_xml_path")"
+    win_export_script_path="$(to_win_path "$export_script_path")"
+    >&2 echo -e "--Exporting keys to $win_export_xml_path--"
+    aspnet_regiis -pc "$container" -exp
+    aspnet_regiis -px "$container" "$win_export_xml_path" -pri
+    echo -e "aspnet_regiis -pi \"${container}\" \"${win_export_xml_path}\"\r\naspnet_regiis -pa \"${container}\" \"NT Authority\Network Service\"" >"$win_export_script_path"
+  fi
+
   web_config_path="$file_root/web.config"
   cp "$file_path" "$web_config_path"
   win_file_root="$(to_win_path "$file_root")"
   if [ "$encrypt" = true ] ; then
     >&2 echo "--Encrypting $section of config in $win_file_root--"
-    aspnet_regiis -pef "$section" "$win_file_root"
+    aspnet_regiis -pef "$section" "$win_file_root" -prov "$provider"
     >&2 echo -e "${GREEN}--Encryption completed successfully--${NC}"
   elif [ "$decrypt" = true ] ; then
     >&2 echo "--Decrypting $section of config in $win_file_root--"
-    aspnet_regiis -pdf "$section" "$win_file_root"
+    aspnet_regiis -pdf "$section" "$win_file_root" -prov "$provider"
     >&2 echo -e "${GREEN}--Decryption completed successfully--${NC}"
   fi
   rm "$file_path"
