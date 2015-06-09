@@ -14,9 +14,10 @@ decrypt=false
 net_encryption=false
 section=""
 provider="RsaProtectedConfigurationProvider"
+container=""
 export=false
 
-usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-E] path"
+usage_short="${CYAN}Usage: cryptkeeper [-e] [-d] [-n] [-s section] [-p provider] [-C container] [-E] path"
 usage_long="$usage_short\n-e: Encrypt target."
 usage_long="$usage_long\n-d: Decrypts target."
 usage_long="$usage_long\n-n: Specifies to use .NET encryption."
@@ -50,6 +51,9 @@ while getopts "$options" opt ; do
       ;;
     p )
       provider=$OPTARG
+      ;;
+    C )
+      container=$OPTARG
       ;;
     E )
       export=true
@@ -111,7 +115,7 @@ if [ "$net_encryption" = true ] ; then
   fi
 
   if [ "$export" = true ] ; then
-    aspnet_regiis -pc "$provider" -exp
+    aspnet_regiis -pc "$container" -exp
   fi
 
   web_config_path="$file_root/web.config"
